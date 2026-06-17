@@ -14,5 +14,9 @@ manifest:
       url: https://github.com/mctechnology17/zmk-nice-oled
       revision: main
       path: modules/zmk-nice-oled
+    - name: miryoku_zmk
+      url: https://github.com/manna-harbour/miryoku_zmk
+      revision: master
+      path: modules/miryoku_zmk
   self:
     path: config
