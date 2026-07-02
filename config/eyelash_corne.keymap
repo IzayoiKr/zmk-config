@@ -54,6 +54,7 @@
     };
 };
 
+#include "miryoku/custom_config.h"
 #include "miryoku/mapping/48/eyelash_corne.h"
 #include "miryoku/miryoku.dtsi"
 
