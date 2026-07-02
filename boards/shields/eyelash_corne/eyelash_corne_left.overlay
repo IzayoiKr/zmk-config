@@ -16,7 +16,7 @@
 
 &nice_view_spi {
     status = "okay";
-    ssd1306@0 {
+    ssd1306: ssd1306@0 {
         compatible = "solomon,ssd1306fb";
         reg = <0>;
         spi-max-frequency = <4000000>;
