@@ -1,0 +1,46 @@
+when:
+  event: [push, manual]
+
+variables:
+  - &img "zmkfirmware/zmk-build-arm:stable"
+
+steps:
+  init:
+    image: *img
+    commands:
+      - west init -l /woodpecker/src/config
+      - west update --fetch-opt=--filter=tree:0
+      - west zephyr-export
+
+  build_right:
+    image: *img
+    depends_on: [init]
+    commands:
+      - west build -s zmk/app -d build/right -b nice_nano_v2 -- -DZMK_CONFIG=/woodpecker/src/config -DSHIELD="eyelash_corne_right nice_oled"
+
+  build_left:
+    image: *img
+    depends_on: [init]
+    commands:
+      - west build -s zmk/app -d build/left -b nice_nano_v2 -S studio-rpc-usb-uart -- -DZMK_CONFIG=/woodpecker/src/config -DSHIELD="eyelash_corne_left nice_oled" -DCONFIG_ZMK_STUDIO=y -DCONFIG_ZMK_STUDIO_LOCKING=n
+
+  build_reset:
+    image: *img
+    depends_on: [init]
+    commands:
+      - west build -s zmk/app -d build/reset -b nice_nano_v2 -- -DZMK_CONFIG=/woodpecker/src/config -DSHIELD="settings_reset"
+
+  artifacts:
+    image: *img
+    depends_on: [build_right, build_left, build_reset]
+    commands:
+      - mkdir -p firmware
+      - cp build/right/zephyr/zmk.uf2 firmware/eyelash_corne_right-nice_nano_v2-zmk.uf2 2>/dev/null || cp build/right/zephyr/zmk.bin firmware/eyelash_corne_right-nice_nano_v2-zmk.bin 2>/dev/null || true
+      - cp build/left/zephyr/zmk.uf2 firmware/eyelash_corne_studio_left-nice_nano_v2-zmk.uf2 2>/dev/null || cp build/left/zephyr/zmk.bin firmware/eyelash_corne_studio_left-nice_nano_v2-zmk.bin 2>/dev/null || true
+      - cp build/reset/zephyr/zmk.uf2 firmware/settings_reset-nice_nano_v2-zmk.uf2 2>/dev/null || cp build/reset/zephyr/zmk.bin firmware/settings_reset-nice_nano_v2-zmk.bin 2>/dev/null || true
+
+  publish:
+    image: *img
+    depends_on: [artifacts]
+    commands:
+      - ls -la firmware/
